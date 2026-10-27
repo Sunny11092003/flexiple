@@ -1,0 +1,307 @@
+<!doctype html>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GCC Atlas</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+:root{
+  --bg:#EEF1EF; --surface:#FFFFFF; --surface2:#E4E9E6; --fg:#13201B; --muted:#55655E; --line:#CBD4CF;
+  --accent:#D9480F; --accent-ink:#FFFFFF; --good:#1B7F4B; --warn:#B7791F; --bad:#B42318; --chip:#DCE5E0;
+  --font:'Schibsted Grotesk',system-ui,-apple-system,'Segoe UI',sans-serif; --mono:'JetBrains Mono',ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0E1613; --surface:#16211C; --surface2:#1E2C26; --fg:#E6EEE9; --muted:#8FA39A; --line:#2B3C34;
+  --accent:#FF7A3D; --accent-ink:#1A0B03; --good:#4CC38A; --warn:#E2B04A; --bad:#FF8A7A; --chip:#233229; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0E1613; --surface:#16211C; --surface2:#1E2C26; --fg:#E6EEE9; --muted:#8FA39A; --line:#2B3C34;
+  --accent:#FF7A3D; --accent-ink:#1A0B03; --good:#4CC38A; --warn:#E2B04A; --bad:#FF8A7A; --chip:#233229; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font-family:var(--font);font-size:15px;line-height:1.5;margin:0;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0 48px}
+.wrap{max-width:1120px;margin:0 auto}
+h1,h2,h3{text-wrap:balance;margin:0;line-height:1.15}
+a{color:var(--accent)}
+button,input,select{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.mono{font-family:var(--mono);font-variant-numeric:tabular-nums}
+header.mast{padding:22px 0 8px;display:flex;flex-wrap:wrap;gap:12px 24px;align-items:flex-end;justify-content:space-between}
+.brand{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
+.brand b{font-size:30px;font-weight:800;letter-spacing:-.02em}
+.brand b i{font-style:normal;color:var(--accent)}
+.brand span{color:var(--muted);font-size:14px;max-width:46ch}
+.fy{font-family:var(--mono);font-size:12px;color:var(--muted)}
+.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:10px;overflow:hidden;margin:14px 0 6px}
+.stat{background:var(--surface);padding:12px 14px;min-width:0}
+.stat .n{font-family:var(--mono);font-size:24px;font-weight:500;letter-spacing:-.02em}
+.stat .l{font-size:12px;color:var(--muted)}
+.note{font-size:12.5px;color:var(--muted);margin:6px 0 0}
+nav.tabs{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);display:flex;gap:4px;overflow-x:auto;padding:10px 0;border-bottom:1px solid var(--line);margin-top:10px}
+.tab{white-space:nowrap;border:1px solid transparent;background:none;padding:8px 14px;border-radius:8px;cursor:pointer;font-weight:600;color:var(--muted)}
+.tab:hover{color:var(--fg)}
+.tab[aria-selected="true"]{background:var(--fg);color:var(--bg)}
+section.pane{padding-top:22px}
+[hidden]{display:none!important}
+.lede{font-size:18px;max-width:62ch;margin:0 0 18px;font-weight:500}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px;min-width:0}
+.grid{display:grid;gap:14px}
+.cols2{grid-template-columns:repeat(auto-fit,minmax(min(100%,320px),1fr))}
+.toolbar{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:14px;align-items:center}
+.toolbar input,.toolbar select{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:9px 12px;min-width:0}
+.toolbar input{flex:1 1 220px}
+.count{font-family:var(--mono);font-size:12px;color:var(--muted);margin-left:auto}
+.chip{display:inline-block;background:var(--chip);border-radius:999px;padding:2px 10px;font-size:12px;font-weight:600;white-space:nowrap}
+.chip.good{color:var(--good)} .chip.warn{color:var(--warn)} .chip.bad{color:var(--bad)}
+.tablewrap{overflow-x:auto;border:1px solid var(--line);border-radius:12px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;min-width:560px}
+th,td{text-align:left;padding:10px 14px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:11.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);font-weight:600;background:var(--surface2)}
+tr:last-child td{border-bottom:0}
+.claim{display:grid;gap:12px}
+.claim h3{font-size:18px}
+.vals{display:grid;gap:8px;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr))}
+.val{border:1px solid var(--line);border-radius:10px;padding:10px 12px;background:var(--bg);min-width:0}
+.val b{display:block;font-family:var(--mono);font-size:20px;font-weight:500}
+.val small{color:var(--muted);display:block}
+.rec{border-left:3px solid var(--accent);padding:6px 0 6px 12px;font-size:14px}
+.rec b{color:var(--accent)}
+.bar{height:10px;border-radius:5px;background:var(--surface2);overflow:hidden}
+.bar>i{display:block;height:100%;background:var(--accent);border-radius:5px}
+.citycard h3{font-size:20px;display:flex;justify-content:space-between;gap:8px;align-items:baseline}
+.kv{display:grid;grid-template-columns:1fr auto;gap:6px 12px;margin:10px 0;font-size:14px}
+.kv span:nth-child(odd){color:var(--muted)}
+.kv span:nth-child(even){font-family:var(--mono);text-align:right}
+.field{display:grid;gap:6px;margin-bottom:12px}
+.field label{font-size:12.5px;font-weight:600;color:var(--muted)}
+.field select{background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:9px 10px}
+.field input[type=range]{accent-color:var(--accent);width:100%}
+.rank{display:grid;gap:10px}
+.rrow{display:grid;grid-template-columns:28px minmax(0,1fr) auto;gap:12px;align-items:center;padding:12px;border:1px solid var(--line);border-radius:10px;background:var(--surface)}
+.rrow.top{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent) inset}
+.rrow .pos{font-family:var(--mono);font-weight:500;color:var(--muted)}
+.rrow .why{font-size:13px;color:var(--muted);margin-top:4px}
+.rrow .sc{font-family:var(--mono);font-size:22px}
+.foot{margin-top:28px;font-size:12.5px;color:var(--muted);border-top:1px solid var(--line);padding-top:14px;max-width:80ch}
+.theme{background:none;border:1px solid var(--line);border-radius:8px;padding:6px 10px;cursor:pointer;font-size:12px;color:var(--muted)}
+@media (max-width:640px){.stats{grid-template-columns:repeat(2,minmax(0,1fr))}.brand b{font-size:26px}}
+@media (prefers-reduced-motion:no-preference){.bar>i{transition:width .35s ease}}
+</style>
+
+<div class="wrap">
+  <header class="mast">
+    <div class="brand"><b>GCC<i>Atlas</i></b><span>One reconciled source of truth for India's Global Capability Centre ecosystem. Every number shows where it came from and where sources disagree.</span></div>
+    <div style="display:flex;gap:10px;align-items:center"><span class="fy">Prototype · data as of Oct 2026</span><button class="theme" id="themeBtn" type="button">Theme</button></div>
+  </header>
+
+  <div class="stats" aria-label="Headline numbers, FY26 Nasscom-Zinnov">
+    <div class="stat"><div class="n">2,117</div><div class="l">GCCs (parent companies)</div></div>
+    <div class="stat"><div class="n">3,728</div><div class="l">centres across them</div></div>
+    <div class="stat"><div class="n">2.36M</div><div class="l">people employed</div></div>
+    <div class="stat"><div class="n">$98.4B</div><div class="l">annual revenue</div></div>
+  </div>
+  <p class="note">Source: Nasscom-Zinnov GCC Landscape 2026, FY26. This is one report's version. Other reports count differently, which is the problem the first tab shows.</p>
+
+  <nav class="tabs" role="tablist" aria-label="Atlas sections">
+    <button class="tab" role="tab" data-tab="truth">Truth Ledger</button>
+    <button class="tab" role="tab" data-tab="directory">GCC Directory</button>
+    <button class="tab" role="tab" data-tab="cities">City Compare</button>
+    <button class="tab" role="tab" data-tab="policy">State Policies</button>
+    <button class="tab" role="tab" data-tab="finder">City Finder</button>
+  </nav>
+
+  <section class="pane" id="pane-truth" hidden></section>
+  <section class="pane" id="pane-directory" hidden></section>
+  <section class="pane" id="pane-cities" hidden></section>
+  <section class="pane" id="pane-policy" hidden></section>
+  <section class="pane" id="pane-finder" hidden></section>
+
+  <p class="foot">Prototype scope: the Truth Ledger, City Compare and State Policies hold sourced figures from published reports (Nasscom-Zinnov, JLL, Cushman &amp; Wakefield, Colliers, ICRA, CBRE, state policy documents). The directory is a seed sample of well-known centres with indicative city and sector tags. City Finder scores are analyst judgement and are labelled as such. In production each field is filled by a pipeline of registry filings, lease records, press and policy notifications, and each value keeps its source and date.</p>
+</div>
+
+<script>
+const DATA = {
+  claims: [
+    { title:"How many GCCs are there in India?",
+      vals:[
+        {v:"2,117", s:"Parent companies, FY26", src:"Nasscom-Zinnov, May 2026"},
+        {v:"3,728", s:"Individual centres, FY26", src:"Nasscom-Zinnov, May 2026"},
+        {v:"1,700+", s:"Parent companies, FY24", src:"Nasscom-Zinnov, Sep 2024"},
+        {v:"2,975", s:"Individual centres, FY24", src:"Nasscom-Zinnov, Sep 2024"}],
+      why:"Reports mix two units (a company with a GCC vs. each office of that GCC) and two years. Headlines quote them as if they were one number.",
+      rec:"Atlas always reports a count with its unit and year. Default view: parent companies, latest fiscal year, with centres as a drill-down." },
+    { title:"How many new GCCs arrived recently?",
+      vals:[
+        {v:"100+", s:"New GCCs added in FY26", src:"Nasscom-Zinnov, May 2026"},
+        {v:"200+", s:"New GCCs in two years to early 2026", src:"JLL India"},
+        {v:"400+", s:"New GCCs in five years (centres: 1,100+)", src:"Nasscom-Zinnov"}],
+      why:"Different windows and different definitions of a 'new' GCC (announced, incorporated, or operating).",
+      rec:"Atlas tracks each entry as a dated event: announced, incorporated, leased, first hire. 'New' is then a query, not an opinion." },
+    { title:"How much office space did Bengaluru and Hyderabad lease in H1 2026?",
+      vals:[
+        {v:"9.37M sq ft", s:"Bengaluru gross leasing", src:"H1 2026 market table (CXOToday)"},
+        {v:"10.5M sq ft", s:"Bengaluru gross leasing", src:"Colliers India"},
+        {v:"5.38M sq ft", s:"Hyderabad gross leasing", src:"H1 2026 market table (CXOToday)"},
+        {v:"7.2M sq ft", s:"Hyderabad gross leasing", src:"Colliers India"}],
+      why:"Brokers cover different micro-markets and treat flex-space operators differently. Both are internally consistent.",
+      rec:"Atlas shows both, names the methodology gap, and lets a user pick one broker as their house view." },
+    { title:"What is Maharashtra's GCC target?",
+      vals:[
+        {v:"~200", s:"New GCCs targeted by 2030", src:"CBRE, Aug 2026"},
+        {v:"400", s:"New GCCs targeted", src:"Law.asia state summary"},
+        {v:"4 lakh", s:"Jobs targeted (both agree)", src:"CBRE and Law.asia"}],
+      why:"Secondary summaries of the same policy disagree on the headline target. Only the notified policy document settles it.",
+      rec:"Atlas links each policy figure to the notified document and flags anything that is only secondary-sourced." },
+    { title:"What share of GCC leasing does Bengaluru hold?",
+      vals:[
+        {v:"40%", s:"FY23 to FY25 GCC leasing share", src:"ICRA"},
+        {v:"46%", s:"Gross GCC leasing, two years to early 2025", src:"Realtynmore report"},
+        {v:"~42%", s:"Share of GCC-occupied stock", src:"Occupier stock report"}],
+      why:"One is a flow (leasing over time), one is a stock (space already occupied), and the windows differ.",
+      rec:"Atlas separates flow from stock and labels the period on every share." }
+  ],
+  cities: [
+    {n:"Bengaluru", gccLease:5.36, gross:"9.4 to 10.5", gccShare:"n/a", fy2325:40, fit:"Tech, R&D, product", state:"Karnataka", note:"Largest GCC market. Two-thirds of new GCCs choose Bengaluru or Hyderabad."},
+    {n:"Pune", gccLease:3.01, gross:"6.0", gccShare:"n/a", fy2325:null, fit:"BFSI, engineering", state:"Maharashtra", note:"Net absorption more than doubled year on year in H1 2026."},
+    {n:"Delhi NCR", gccLease:2.37, gross:"6.6", gccShare:"n/a", fy2325:null, fit:"BFSI, ops, tech", state:"Haryana / Uttar Pradesh", note:"Haryana notified a dedicated GCC policy in 2026."},
+    {n:"Mumbai", gccLease:2.23, gross:"5.9", gccShare:"n/a", fy2325:null, fit:"BFSI, finance", state:"Maharashtra", note:"Mumbai and Pune lead BFSI GCC operations."},
+    {n:"Hyderabad", gccLease:null, gross:"5.4 to 7.2", gccShare:"37% of Q2 leasing", fy2325:18, fit:"Tech, life sciences", state:"Telangana", note:"Vacancy fell the most year on year, so good space is tightening."},
+    {n:"Chennai", gccLease:null, gross:"4.0", gccShare:"46% of Q2, 51% of H1", fy2325:16, fit:"Engineering, manufacturing", state:"Tamil Nadu", note:"GCCs took a record share of leasing in H1 2026."}
+  ],
+  policies: [
+    {s:"Karnataka", name:"GCC Policy 2024-29", target:"~500 new GCCs, 3.5 lakh jobs by 2029", inc:"R&D grants up to ₹50 crore, rent reimbursement up to 50%, EPF support, 45-day approvals, extra support beyond Bengaluru (Mysuru, Mangaluru)", st:"In force", src:"Govt. of Karnataka, India Briefing"},
+    {s:"Maharashtra", name:"GCC Policy 2025", target:"~200 to 400 new GCCs, 4 lakh jobs by 2030 (sources differ)", inc:"GCC Parks in Mumbai, Pune, Nagpur, Nashik; single facilitation cell; 24x7 operation approvals; diversity-linked bonus", st:"In force", src:"CBRE, ICAI, Law.asia"},
+    {s:"Haryana", name:"GCC Policy 2026", target:"100+ new GCCs over 5 years", inc:"Capital and operating cost support, employment-linked incentives, R&D support. Total incentives capped at 100% of fixed capital investment. Valid from 27 May 2026.", st:"In force", src:"Grant Thornton alert, 12 Jun 2026"},
+    {s:"Gujarat", name:"GCC Policy 2025-30", target:"250+ new GCCs, 50,000+ jobs, ₹10,000 crore investment", inc:"Capital support and payroll incentives, tier-2 city focus", st:"In force", src:"Dept. of Science & Technology, Gujarat"},
+    {s:"Rajasthan", name:"GCC policy", target:"200+ new GCCs, 1.5 lakh jobs by 2029", inc:"Details not confirmed from an official document", st:"Reported", src:"CBRE, Aug 2026"},
+    {s:"Madhya Pradesh", name:"GCC Policy 2025", target:"Not stated", inc:"100% patent filing assistance (up to ₹2 lakh domestic, ₹3 lakh international); 50% support for AI and cybersecurity CoEs up to ₹10 crore", st:"In force", src:"Industry policy tracker"},
+    {s:"Uttar Pradesh", name:"GCC Policy 2024", target:"1,000+ GCCs and 5 lakh jobs (reported)", inc:"100% stamp duty exemption and payroll subsidies (reported)", st:"Reported", src:"India Briefing"},
+    {s:"Tamil Nadu", name:"GCC employee incentives", target:"No standalone target", inc:"Specialised incentives for GCC employees; GCCs treated like R&D centres", st:"Scheme", src:"CBRE; Govt. of Tamil Nadu budget"},
+    {s:"Telangana", name:"Policy framework (ICT Policy 2021-26)", target:"120 new GCCs by 2026 (reported)", inc:"Framework adopted; no standalone GCC policy document confirmed", st:"Framework", src:"CBRE; state outlook"},
+    {s:"Kerala", name:"Draft GCC policy", target:"Not stated", inc:"Draft proposed", st:"Draft", src:"CBRE, Aug 2026"}
+  ],
+  gccs: [
+    ["Walmart Global Tech","USA",["Bengaluru","Chennai"],"Retail"],["Target in India","USA",["Bengaluru"],"Retail"],
+    ["Lowe's India","USA",["Bengaluru"],"Retail"],["Goldman Sachs","USA",["Bengaluru","Hyderabad"],"BFSI"],
+    ["JPMorgan Chase","USA",["Mumbai","Bengaluru","Hyderabad"],"BFSI"],["Cisco","USA",["Bengaluru"],"Technology"],
+    ["Intel","USA",["Bengaluru"],"Semiconductors"],["Texas Instruments","USA",["Bengaluru"],"Semiconductors"],
+    ["SAP Labs India","Germany",["Bengaluru","Pune"],"Technology"],["Mercedes-Benz R&D India","Germany",["Bengaluru"],"Automotive"],
+    ["Philips Innovation Campus","Netherlands",["Bengaluru","Pune"],"Healthcare"],
+    ["Microsoft India Development Center","USA",["Hyderabad","Bengaluru"],"Technology"],["Amazon","USA",["Hyderabad","Bengaluru","Chennai"],"Technology"],
+    ["Google","USA",["Hyderabad","Bengaluru"],"Technology"],["Apple","USA",["Hyderabad","Bengaluru"],"Technology"],
+    ["Novartis","Switzerland",["Hyderabad"],"Pharma"],["Amgen","USA",["Hyderabad"],"Pharma"],
+    ["Wells Fargo","USA",["Hyderabad","Bengaluru"],"BFSI"],["Vanguard","USA",["Hyderabad"],"BFSI"],
+    ["Barclays","UK",["Pune"],"BFSI"],["Deutsche Bank","Germany",["Pune","Bengaluru"],"BFSI"],
+    ["Mastercard","USA",["Pune"],"BFSI"],["Maersk","Denmark",["Pune"],"Logistics"],["Cummins","USA",["Pune"],"Industrial"],
+    ["Ford Global Business Services","USA",["Chennai"],"Automotive"],["Renault Nissan Technology & Business Centre","France / Japan",["Chennai"],"Automotive"],
+    ["Citi","USA",["Pune","Chennai","Mumbai"],"BFSI"],["Caterpillar","USA",["Chennai"],"Industrial"],
+    ["American Express","USA",["Delhi NCR"],"BFSI"],["Adobe","USA",["Delhi NCR"],"Technology"],
+    ["Samsung R&D Institute","South Korea",["Delhi NCR","Bengaluru"],"Technology"],["UnitedHealth Group (Optum)","USA",["Delhi NCR","Bengaluru","Hyderabad"],"Healthcare"]
+  ],
+  // Analyst-judgement scores 1-5 (illustrative; to be replaced by measured data)
+  scores: {
+    "Bengaluru":{talent:5,cost:2.5,space:3,policy:5},
+    "Hyderabad":{talent:4.5,cost:3.5,space:3,policy:3.5},
+    "Pune":{talent:4,cost:3.5,space:3.5,policy:4},
+    "Chennai":{talent:3.5,cost:4,space:3.5,policy:3},
+    "Delhi NCR":{talent:4,cost:3,space:3,policy:4},
+    "Mumbai":{talent:3.5,cost:2,space:3,policy:4}
+  },
+  fit: {
+    "Technology / R&D":{"Bengaluru":1.15,"Hyderabad":1.12,"Delhi NCR":1.0,"Pune":1.0,"Chennai":0.95,"Mumbai":0.9},
+    "Banking, financial services":{"Mumbai":1.15,"Pune":1.12,"Hyderabad":1.05,"Bengaluru":1.0,"Delhi NCR":1.0,"Chennai":0.95},
+    "Engineering and manufacturing":{"Chennai":1.15,"Pune":1.12,"Bengaluru":1.0,"Hyderabad":0.95,"Delhi NCR":0.95,"Mumbai":0.85},
+    "Operations and shared services":{"Chennai":1.1,"Pune":1.08,"Delhi NCR":1.08,"Hyderabad":1.0,"Bengaluru":0.95,"Mumbai":0.9}
+  }
+};
+const $ = (s,r=document)=>r.querySelector(s);
+const esc = s => String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+/* Truth ledger */
+function renderTruth(){
+  $('#pane-truth').innerHTML = `<p class="lede">The same question has several published answers. Atlas shows all of them, explains why they differ, and applies one stated rule so a reader can pick a number and defend it.</p>
+  <div class="grid">${DATA.claims.map(c=>`<article class="panel claim"><h3>${esc(c.title)}</h3>
+    <div class="vals">${c.vals.map(v=>`<div class="val"><b>${esc(v.v)}</b><small>${esc(v.s)}</small><small class="mono">${esc(v.src)}</small></div>`).join('')}</div>
+    <div><span class="chip warn">Why they differ</span><p style="margin:6px 0 0">${esc(c.why)}</p></div>
+    <div class="rec"><b>Atlas rule.</b> ${esc(c.rec)}</div></article>`).join('')}</div>`;
+}
+
+/* Directory */
+function renderDirectory(){
+  const cities=[...new Set(DATA.gccs.flatMap(g=>g[2]))].sort();
+  const sectors=[...new Set(DATA.gccs.map(g=>g[3]))].sort();
+  $('#pane-directory').innerHTML = `<p class="lede">Who is operating where. This is a seed sample of well-known centres. In production the list is built from registry filings, lease records and press, with a source and date on every row.</p>
+  <div class="toolbar">
+    <input id="q" type="search" placeholder="Search company, parent country, city" aria-label="Search GCCs">
+    <select id="fc" aria-label="City"><option value="">All cities</option>${cities.map(c=>`<option>${c}</option>`).join('')}</select>
+    <select id="fs" aria-label="Sector"><option value="">All sectors</option>${sectors.map(c=>`<option>${c}</option>`).join('')}</select>
+    <span class="count" id="cnt"></span></div>
+  <div class="tablewrap"><table><thead><tr><th>GCC</th><th>Parent HQ</th><th>Cities</th><th>Sector</th></tr></thead><tbody id="rows"></tbody></table></div>`;
+  const apply=()=>{
+    const q=$('#q').value.toLowerCase(), c=$('#fc').value, s=$('#fs').value;
+    const list=DATA.gccs.filter(g=>(!c||g[2].includes(c))&&(!s||g[3]===s)&&(!q||(g[0]+g[1]+g[2].join(' ')+g[3]).toLowerCase().includes(q)));
+    $('#rows').innerHTML=list.map(g=>`<tr><td><b>${esc(g[0])}</b></td><td>${esc(g[1])}</td><td>${g[2].map(x=>`<span class="chip">${esc(x)}</span>`).join(' ')}</td><td>${esc(g[3])}</td></tr>`).join('')||`<tr><td colspan="4">No GCC matches those filters. Clear a filter to see more.</td></tr>`;
+    $('#cnt').textContent=`${list.length} of ${DATA.gccs.length} in sample`;
+  };
+  ['q','fc','fs'].forEach(id=>$('#'+id).addEventListener('input',apply)); apply();
+}
+
+/* Cities */
+function renderCities(){
+  const max=Math.max(...DATA.cities.map(c=>c.gccLease||0));
+  $('#pane-cities').innerHTML=`<p class="lede">Where GCCs are actually taking space. Cushman &amp; Wakefield reports 16.5M sq ft of GCC leasing in H1 2026, up 38% on last year, and four cities hold nearly 80% of it.</p>
+  <div class="grid cols2">${DATA.cities.map(c=>`<article class="panel citycard"><h3>${c.n}<span class="chip">${esc(c.fit)}</span></h3>
+    ${c.gccLease?`<div class="kv"><span>GCC leasing, H1 2026</span><span>${c.gccLease.toFixed(2)}M sq ft</span></div><div class="bar" role="img" aria-label="GCC leasing ${c.gccLease} million square feet"><i style="width:${(c.gccLease/max*100).toFixed(0)}%"></i></div>`:`<div class="kv"><span>GCC share of leasing</span><span>${esc(c.gccShare)}</span></div>`}
+    <div class="kv"><span>All-occupier leasing, H1 2026</span><span>${esc(c.gross)}M sq ft</span>${c.fy2325?`<span>Share of GCC leasing, FY23-25</span><span>${c.fy2325}%</span>`:''}<span>State</span><span>${esc(c.state)}</span></div>
+    <p class="note">${esc(c.note)}</p></article>`).join('')}</div>
+  <p class="note" style="margin-top:12px">Sources: Cushman &amp; Wakefield (GCC leasing), Colliers and JLL (all-occupier leasing), ICRA (FY23-25 shares). Ranges show where brokers disagree. Hyderabad and Chennai GCC volumes were not in the sources reviewed, so shares are shown instead.</p>`;
+}
+
+/* Policies */
+function renderPolicy(){
+  const stc={ "In force":"good","Reported":"warn","Scheme":"warn","Framework":"warn","Draft":"bad"};
+  $('#pane-policy').innerHTML=`<p class="lede">States now compete for GCCs with dedicated policies. CBRE counts 1,380 new GCCs and 1.18 million jobs targeted across states by 2031.</p>
+  <div class="tablewrap"><table style="min-width:760px"><thead><tr><th>State</th><th>Policy</th><th>Target</th><th>Incentives</th><th>Status</th><th>Source</th></tr></thead><tbody>
+  ${DATA.policies.map(p=>`<tr><td><b>${esc(p.s)}</b></td><td>${esc(p.name)}</td><td>${esc(p.target)}</td><td>${esc(p.inc)}</td><td><span class="chip ${stc[p.st]||''}">${esc(p.st)}</span></td><td class="mono" style="font-size:12px">${esc(p.src)}</td></tr>`).join('')}</tbody></table></div>
+  <p class="note" style="margin-top:12px">"Reported" means named in secondary sources without an official document confirmed. Atlas flags these until the notified policy is attached.</p>`;
+}
+
+/* Finder */
+function renderFinder(){
+  $('#pane-finder').innerHTML=`<p class="lede">Tell Atlas what you are setting up and what matters. It ranks the six main cities and shows why.</p>
+  <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));align-items:start">
+    <div class="panel"><div class="field"><label for="fn">What will the GCC do?</label><select id="fn">${Object.keys(DATA.fit).map(k=>`<option>${k}</option>`).join('')}</select></div>
+      ${[["talent","Talent depth"],["cost","Low cost"],["space","Space availability"],["policy","Policy support"]].map(([k,l])=>`<div class="field"><label for="w_${k}">${l}: <span class="mono" id="v_${k}">3</span> / 5</label><input id="w_${k}" type="range" min="0" max="5" step="1" value="3"></div>`).join('')}
+      <p class="note">Scores are analyst judgement on a 1 to 5 scale, shown for the prototype. In production each score is computed from measured talent, salary, rent and incentive data.</p></div>
+    <div class="rank" id="rank" aria-live="polite"></div></div>`;
+  const calc=()=>{
+    const fn=$('#fn').value, w={};
+    ['talent','cost','space','policy'].forEach(k=>{w[k]=+$('#w_'+k).value;$('#v_'+k).textContent=w[k]});
+    const tot=Object.values(w).reduce((a,b)=>a+b,0)||1;
+    const res=Object.keys(DATA.scores).map(c=>{
+      const s=DATA.scores[c]; const base=(['talent','cost','space','policy'].reduce((a,k)=>a+s[k]*w[k],0))/tot;
+      const sc=Math.min(5,base*DATA.fit[fn][c]);
+      const parts=['talent','cost','space','policy'].map(k=>[k,s[k]*w[k]]).sort((a,b)=>b[1]-a[1]);
+      const labels={talent:"talent depth",cost:"cost",space:"space availability",policy:"policy support"};
+      return {c,sc,why:`Strongest on ${labels[parts[0][0]]}${w[parts[1][0]]?` and ${labels[parts[1][0]]}`:''}. ${DATA.fit[fn][c]>1.05?'Strong fit for this function.':DATA.fit[fn][c]<0.95?'Weaker fit for this function.':'Neutral fit for this function.'}`};
+    }).sort((a,b)=>b.sc-a.sc);
+    $('#rank').innerHTML=res.map((r,i)=>`<div class="rrow ${i===0?'top':''}"><span class="pos">${i+1}</span><div style="min-width:0"><b>${r.c}</b><div class="why">${esc(r.why)}</div></div><span class="sc">${r.sc.toFixed(1)}</span></div>`).join('');
+  };
+  $('#pane-finder').addEventListener('input',calc); calc();
+}
+
+/* Routing and theme */
+const panes={truth:renderTruth,directory:renderDirectory,cities:renderCities,policy:renderPolicy,finder:renderFinder};
+const done={};
+function show(name){
+  if(!panes[name]) name='truth';
+  if(!done[name]){panes[name]();done[name]=1}
+  Object.keys(panes).forEach(k=>{$('#pane-'+k).hidden=(k!==name)});
+  document.querySelectorAll('.tab').forEach(t=>t.setAttribute('aria-selected',String(t.dataset.tab===name)));
+}
+document.querySelectorAll('.tab').forEach(t=>t.addEventListener('click',()=>{location.hash=t.dataset.tab}));
+addEventListener('hashchange',()=>show(location.hash.slice(1)));
+show(location.hash.slice(1)||'truth');
+$('#themeBtn').addEventListener('click',()=>{
+  const r=document.documentElement, dark=r.dataset.theme?r.dataset.theme==='dark':matchMedia('(prefers-color-scheme:dark)').matches;
+  r.dataset.theme=dark?'light':'dark';
+});
+</script>
